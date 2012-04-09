@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<infinispan xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:infinispan:config:5.1 http://www.infinispan.org/schemas/infinispan-config-5.1.xsd"
+	xmlns="urn:infinispan:config:5.1">
+	<global>
+	</global>
+	<default>
+		<locking lockAcquisitionTimeout="20000" />
+		<invocationBatching enabled="true" />
+		<eviction maxEntries="-1" strategy="NONE" />
+		<expiration maxIdle="-1" />
+	</default>
+
+	<namedCache name="indexMetadata">
+		<eviction wakeUpInterval="5000" maxEntries="50" strategy="LRU" />
+		<!-- If preload enabled to true with JdbmCacheStore then ConcurrentModificationException happens at the *second* test! -->
+		<loaders shared="false" preload="false" passivation="true">
+			<loader class="org.infinispan.loaders.jdbm.JdbmCacheStore"
+				fetchPersistentState="true" purgeSynchronously="false"
+				purgeOnStartup="false">
+				<async enabled="true" threadPoolSize="10" flushLockTimeout="60000"/>
+				<properties>
+					<property name="location" value="/tmp/infinispan/index_metadata" />
+				</properties>
+			</loader>
+		</loaders>
+	</namedCache>
+
+	<namedCache name="indexChunks" >
+		<eviction wakeUpInterval="5000" maxEntries="50" strategy="LRU" />
+		<loaders shared="false" preload="false" passivation="true">
+			<loader class="org.infinispan.loaders.jdbm.JdbmCacheStore"
+				fetchPersistentState="true" purgeSynchronously="true"
+				purgeOnStartup="false">
+				<async enabled="true" threadPoolSize="10" flushLockTimeout="60000"/>
+				<properties>
+					<property name="location" value="/tmp/infinispan/index_chunks" />
+				</properties>
+			</loader>
+		</loaders>
+	</namedCache>
+
+	<namedCache name="indexDistLocks">
+	</namedCache>
+
+</infinispan>
